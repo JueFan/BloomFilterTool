@@ -106,8 +106,6 @@ public class BloomFilter {
 		boolean isExist = false;
 		/**字符串在位数组中的位置*/
 		long bit = hash%mod;
-		/*long site = bit / 32;
-		long mod1 = bit % 32;*/
 		/**int类型的位置*/
 		long site = bit >> 5;
 		/**int类型中32位的第mod1位*/
@@ -123,7 +121,6 @@ public class BloomFilter {
 				set[(int) site] = set[(int) site] | (1 << mod1);
 			}	
 		} catch (Exception e) {
-			System.err.println(mod + "\t" + bit + "\t" + (bit >> 5) + "\t" + set.length);
 		}
 		return isExist;
 	}
@@ -132,132 +129,22 @@ public class BloomFilter {
 	 * 判断字符串是否已经存在
 	 * @param string
 	 */
-	public static boolean setBitSet1(String string){
+	public static boolean isExist(String string){
 		boolean isExist = true;
 		try {
 			long hash = hashCode(string, SEED[0]);
 			for(int j = 0; j < HASH; j++){
 				isExist = setBitMap(bitSets[j], MOD[j], hash) && isExist;
-			}
-			/**如果isExist == true则表明上面的判断中每一次位数组都判断为1，可知该字符串可能存在*/
-			if(!isExist){
-				total++;
-				builder.append(string).append("\n");
 			}
 		} catch (Exception e) {
 		}
 		return isExist;
 	}
 	
-	/**
-	 * 判断字符串是否已经存在
-	 * @param string
-	 */
-	public static boolean setBitSet2(String string){
-		boolean isExist = true;
-		try {
-			exits = 0;		
-			p = 0;
-			long hash = hashCode(string, SEED[0]);
-			for(int j = 0; j < HASH; j++){
-				isExist = setBitMap(bitSets[j], MOD[j], hash) && isExist;
-			}
-			/**如果isExist == true则表明上面的判断中每一次位数组都判断为1，可知该字符串可能存在*/
-			if(!isExist){
-				total++;
-			}
-		} catch (Exception e) {
-		}
-		return isExist;
-	}
 
 	private static long getMemory(){  
 		Runtime runtime = Runtime.getRuntime();  
 		return runtime.totalMemory() - runtime.freeMemory();  
 	}  
 
-	/**
-	 * 将指定内容写入指定文件中
-	 * 以追加的方式写入
-	 * @param fileWriter  文件路径
-	 * @param context  存储内容
-	 * @param bool 是否追加写入
-	 */
-	public static void FileWrite(String fileName, String context, boolean bool){
-		try{
-			@SuppressWarnings("resource")
-			FileWriter fileWriter = new FileWriter(fileName, bool);
-			fileWriter.write(context);
-			fileWriter.flush();
-		}catch (Exception e) {
-		}
-	}
-
-	/**输出所有参数到文件*/
-	public static void outputParse(String fileName){
-
-		FileWrite(System.getProperty("user.dir") + "\\output\\" + fileName, "Hash串种子为："
-				+ SEED[0] + "\n", true);
-		for(int j = 0; j < HASH; j++){
-			FileWrite(System.getProperty("user.dir") + "\\output\\" + fileName, "Mod种子为："
-					+ MOD[j] + "\n", true);
-		}
-		FileWrite(System.getProperty("user.dir") + "\\output\\" + fileName, 
-				"\n位数组长度: " + BIT + "\n"
-						+ "字符串拆分长度: " + HASH + "\n", true);
-	}
-
-	@SuppressWarnings({ "unused", "resource" })
-	public static void main(String[] args) throws IOException {
-
-		System.out.println("请输入要去重文件的本地路径:");
-		Scanner in = new Scanner(System.in);
-		String pathString = in.next();
-		System.out.println("是否要输出去重后的文件?\t是:1 否:0");
-		in = new Scanner(System.in);
-		String IsOutput = in.next();
-
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-		System.out.println("开始时间: " + df.format(new Date()));
-		String fileName = df.format(new Date()) + ".txt"; 
-
-		System.gc();  
-		long startMem = getMemory(); 
-		BloomFilter bloomFilter = new BloomFilter();
-
-		BufferedReader bufferedReader;
-		/**缓冲池为20M*/
-		bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(     
-				new FileInputStream(pathString))), 1024*1024*20);
-		String buf;
-		int total = 0;
-		
-		/**读取数据判断模块*/
-		if(IsOutput.equals("1")){
-			while ((buf = bufferedReader.readLine()) != null){   
-				total++;
-				BloomFilter.setBitSet1(buf);
-				if(BloomFilter.total % 200000 == 0){
-					FileWrite(System.getProperty("user.dir") + "\\output\\Distinct.txt" , builder.toString(), true);
-					builder.delete(0, builder.length());
-				}
-			}  
-			FileWrite(System.getProperty("user.dir") + "\\output\\Distinct.txt" , builder.toString(), true);
-			builder.delete(0, builder.length());
-		}else {
-			while ((buf = bufferedReader.readLine()) != null){   
-				total++;
-				BloomFilter.setBitSet2(buf);
-			}  
-		}
-		
-		System.gc();
-		long endMem = getMemory(); 
-
-		System.out.println("读取的总标题数量有: " + total + 
-				"\n重复的标题条数有: " + (total - BloomFilter.total )+ 
-				"\nBloomFilter去重后有: " + BloomFilter.total + " 个不同标题\n" 
-				+ "jvm占用内存量为:" + (endMem - startMem)/(1024*1024) + "Mb\n"
-				+ "结束时间: " + df.format(new Date()));
-	}
 }
