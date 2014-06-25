@@ -1,4 +1,4 @@
-package org.juefan.bloomfilter;
+ï»¿package org.juefan.bloomfilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,10 @@ public class PrimeNumber {
 	}
 	
 	public static void main(String[] args){
-		//»ñµÃÒ»¸ö4Î»ÊıµÄËæ»ú´óËØÊı
+		//è·å¾—ä¸€ä¸ª4ä½æ•°çš„éšæœºå¤§ç´ æ•°
 		/*long longVar4 = createRadomPrimeNunber(4);
 		System.out.println(longVar4);
-		//»ñµÃÒ»¸ö5Î»ÊıµÄËæ»ú´óËØÊı
+		//è·å¾—ä¸€ä¸ª5ä½æ•°çš„éšæœºå¤§ç´ æ•°
 		long longVar5 = createRadomPrimeNunber(5);*/
 		System.out.println(listPartPrimeNumber(3,1));
 	}
@@ -41,10 +41,10 @@ public class PrimeNumber {
 	}
 	
 	/**
-	 *  ·µ»Ø100¸öÖ¸¶¨ËØÊı
-	 * @param n ËØÊıµÄÎ»³¤¶È
-	 * @param start ËØÊıµÄ¿ªÊ¼Öµ
-	 * @return ·µ»Ø×î¶à100¸öËØÊı
+	 *  è¿”å›100ä¸ªæŒ‡å®šç´ æ•°
+	 * @param n ç´ æ•°çš„ä½é•¿åº¦
+	 * @param start ç´ æ•°çš„å¼€å§‹å€¼
+	 * @return è¿”å›æœ€å¤š100ä¸ªç´ æ•°
 	 */
 	public static List listPartPrimeNumber(int n, float start){
 		int p = 100;
@@ -63,9 +63,9 @@ public class PrimeNumber {
 	}
 	
 	/**
-	 * ÅĞ¶ÏÒ»¸öÊıÊÇ·ñÊÇËØÊıµÄº¯Êı
-	 * @param x ´ıÅĞ¶ÏµÄÊı
-	 * @return xÊÇ·ñÎªËØÊı
+	 * åˆ¤æ–­ä¸€ä¸ªæ•°æ˜¯å¦æ˜¯ç´ æ•°çš„å‡½æ•°
+	 * @param x å¾…åˆ¤æ–­çš„æ•°
+	 * @return xæ˜¯å¦ä¸ºç´ æ•°
 	 */
 	public static boolean isSushu(long x){
 		if(x<2) return false;
