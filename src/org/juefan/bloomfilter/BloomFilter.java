@@ -13,22 +13,33 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-@SuppressWarnings("unchecked")
 public class BloomFilter {
 
-	/**²úÉúËØÊıµÄÆğÊ¼Êı*/
+	/**äº§ç”Ÿç´ æ•°çš„èµ·å§‹æ•°*/
 	public static  float START = 6.5F;
-	/**HASHº¯ÊıµÄ¸öÊı*/
+	/**HASHå‡½æ•°çš„ä¸ªæ•°*/
 	public static  int HASH = 8;
-	/**Î»Êı×é³¤¶È=10^BIT*START*/
+	/**ä½æ•°ç»„é•¿åº¦=10^BIT*START*/
 	public static  int BIT = 9;
-	/**HASHº¯ÊıµÄÖµ*/
+	/**HASHå‡½æ•°çš„å€¼*/
 	public static  long[] MOD = new long[HASH];
-	/**×Ö·û´®×ª»¯³ÉhashcodeÓÃµ½µÄËã×Ó*/
+	/**å­—ç¬¦ä¸²è½¬åŒ–æˆhashcodeç”¨åˆ°çš„ç®—å­*/
 	public static  long[] SEED = new long[HASH];
 
-	/**³õÊ¼»¯HASHº¯ÊıµÄÖµºÍËã×ÓµÄÖµ*/
-	static {
+	public static int[][] bitSets = new int[HASH][];
+	
+
+	/**å­˜å‚¨åˆ†ç‰‡ä½æ•°ç»„çš„å€¼*/
+
+	public static int exits = 0;
+	public static int p = 0;
+	/**è®°å½•å»é‡åçš„æ€»é‡*/
+	public static int total = 0;
+	public static int memory = 0;
+	public static StringBuilder builder = new StringBuilder();
+
+	/**åˆå§‹åŒ–HASHå‡½æ•°çš„å€¼å’Œç®—å­çš„å€¼*/
+	static {	
 		MOD[0] = 650000011;
 		MOD[1] = 650000017;
 		MOD[2] = 650000047;
@@ -38,19 +49,11 @@ public class BloomFilter {
 		MOD[6] = 650000149;
 		MOD[7] = 650000161;
 		SEED[0] = 650011;
+        init();
 	}
-
-	/**´æ´¢·ÖÆ¬Î»Êı×éµÄÖµ*/
-	public static int[][] bitSets = new int[HASH][];
-	public static int exits = 0;
-	public static int p = 0;
-	/**¼ÇÂ¼È¥ÖØºóµÄ×ÜÁ¿*/
-	public static int total = 0;
-	public static int memory = 0;
-	public static StringBuilder builder = new StringBuilder();
-
-	/**Î»Êı×é³õÊ¼»¯È«²¿Îª0*/
-	public BloomFilter(){
+	
+	/**ä½æ•°ç»„åˆå§‹åŒ–å…¨éƒ¨ä¸º0*/
+	private static void init(){
 		int[][] list = new int[HASH][];
 		for(int j = 0; j < HASH; j++){
 			long size = (MOD[j] >> 5) + 1;
@@ -60,11 +63,12 @@ public class BloomFilter {
 		bitSets = list;
 	}
 
+	
 	/**
-	 * ÖØĞÂÉèÖÃ¸÷¸ö²ÎÊı
-	 * @param hash Î»Êı×éµÄ¸öÊı
-	 * @param start Ã¿¸öÎ»Êı×éµÄ³¤¶ÈÖµ(µÄ×î´óÎ»ÊıÖµ£¬ÀıÈç6553500¿ÉÒÔÊäÈë6.5)
-	 * @param bit Ã¿¸öÎ»Êı×éµÄ³¤¶ÈÎ»(ÀıÈç6553500Ôò¿ÉÒÔÊäÈë7)
+	 * é‡æ–°è®¾ç½®å„ä¸ªå‚æ•°
+	 * @param hash ä½æ•°ç»„çš„ä¸ªæ•°
+	 * @param start æ¯ä¸ªä½æ•°ç»„çš„é•¿åº¦å€¼(çš„æœ€å¤§ä½æ•°å€¼ï¼Œä¾‹å¦‚6553500å¯ä»¥è¾“å…¥6.5)
+	 * @param bit æ¯ä¸ªä½æ•°ç»„çš„é•¿åº¦ä½(ä¾‹å¦‚6553500åˆ™å¯ä»¥è¾“å…¥7)
 	 */
 	public static void resetBitset(int hash, float start, int bit){
 		HASH = hash;
@@ -79,13 +83,13 @@ public class BloomFilter {
 	}
 	
 	/**
-	 * ×Ö·û´®×ª»¯ÊıÖµ·½·¨
-	 * ²ÉÓÃlongÀàĞÍµÄºÃ´¦ÊÇÃ¿¸ö×Ö·û´®Ö»ĞèÒªÔËĞĞÒ»´Îhashcode
-	 * ÈÎÒâ1ÒÚ¸ölongÀàĞÍËæ»úÊı£¬È«²¿¶¼²»ÖØ¸´µÄ¸ÅÂÊÊÇ99.96%
-	 * ËùÒÔÓĞÀíÓÉÏàĞÅlongÀàĞÍµÄhashcodeÓëÃ¿¸ö×Ö·û´®¼¸ºõÒ»Ò»¶ÔÓ¦
-	 * @param string ´ı×ª»¯×Ö·û´®
-	 * @param seed ËØÊıËã×Ó
-	 * @return ×ª»¯ºóµÄÖµ
+	 * å­—ç¬¦ä¸²è½¬åŒ–æ•°å€¼æ–¹æ³•
+	 * é‡‡ç”¨longç±»å‹çš„å¥½å¤„æ˜¯æ¯ä¸ªå­—ç¬¦ä¸²åªéœ€è¦è¿è¡Œä¸€æ¬¡hashcode
+	 * ä»»æ„1äº¿ä¸ªlongç±»å‹éšæœºæ•°ï¼Œå…¨éƒ¨éƒ½ä¸é‡å¤çš„æ¦‚ç‡æ˜¯99.96%
+	 * æ‰€ä»¥æœ‰ç†ç”±ç›¸ä¿¡longç±»å‹çš„hashcodeä¸æ¯ä¸ªå­—ç¬¦ä¸²å‡ ä¹ä¸€ä¸€å¯¹åº”
+	 * @param string å¾…è½¬åŒ–å­—ç¬¦ä¸²
+	 * @param seed ç´ æ•°ç®—å­
+	 * @return è½¬åŒ–åçš„å€¼
 	 */
 	public static long hashCode(String string, long seed){
 		long result = 0;
@@ -97,21 +101,21 @@ public class BloomFilter {
 	}
 
 	/**
-	 * ÅĞ¶Ï×Ö·û´®ÊÇ·ñÔÚµ¥Æ¬Î»Êı×éÖĞ´æÔÚ
-	 * @param set µ¥Æ¬Î»Êı×é
-	 * @param mod Ä³¸öhashº¯ÊıµÄÖµ
-	 * @param hash ×Ö·û´®×ª»¯ºóµÄhashcode
+	 * åˆ¤æ–­å­—ç¬¦ä¸²æ˜¯å¦åœ¨å•ç‰‡ä½æ•°ç»„ä¸­å­˜åœ¨
+	 * @param set å•ç‰‡ä½æ•°ç»„
+	 * @param mod æŸä¸ªhashå‡½æ•°çš„å€¼
+	 * @param hash å­—ç¬¦ä¸²è½¬åŒ–åçš„hashcode
 	 */
 	public static boolean setBitMap(int[] set, long mod, long hash){
 		boolean isExist = false;
-		/**×Ö·û´®ÔÚÎ»Êı×éÖĞµÄÎ»ÖÃ*/
+		/**å­—ç¬¦ä¸²åœ¨ä½æ•°ç»„ä¸­çš„ä½ç½®*/
 		long bit = hash%mod;
-		/**intÀàĞÍµÄÎ»ÖÃ*/
+		/**intç±»å‹çš„ä½ç½®*/
 		long site = bit >> 5;
-		/**intÀàĞÍÖĞ32Î»µÄµÚmod1Î»*/
+		/**intç±»å‹ä¸­32ä½çš„ç¬¬mod1ä½*/
 		long mod1 = bit & 31;
-		/**Î»Êı×éÖĞ¸Ã×Ö·û´®µÄÎ»ÖÃÊÇ·ñÎª1
-		 * Èç¹ûÊÇÔòÍË³öÊ±exits+1£¬·ñÔò½«¸ÃÎ»ÖÃ±ä³É1
+		/**ä½æ•°ç»„ä¸­è¯¥å­—ç¬¦ä¸²çš„ä½ç½®æ˜¯å¦ä¸º1
+		 * å¦‚æœæ˜¯åˆ™é€€å‡ºæ—¶exits+1ï¼Œå¦åˆ™å°†è¯¥ä½ç½®å˜æˆ1
 		 * */
 		try {
 			if(((set[(int) site] >> mod1) & 1) == 1){
@@ -126,7 +130,7 @@ public class BloomFilter {
 	}
 
 	/**
-	 * ÅĞ¶Ï×Ö·û´®ÊÇ·ñÒÑ¾­´æÔÚ
+	 * åˆ¤æ–­å­—ç¬¦ä¸²æ˜¯å¦å·²ç»å­˜åœ¨
 	 * @param string
 	 */
 	public static boolean isExist(String string){
@@ -147,4 +151,15 @@ public class BloomFilter {
 		return runtime.totalMemory() - runtime.freeMemory();  
 	}  
 
+	public static void main(String[] args) {
+		int sum = 0;
+		for(int i = 0; i < 10000000; i++){
+			if(!BloomFilter.isExist(String.valueOf(i))){
+				sum += 1;
+			}
+		}
+		System.out.println(sum);
+		
+	}
 }
+
